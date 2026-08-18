@@ -3,6 +3,9 @@ import passport from "../middleware/passport.js";
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
+const FRONTEND_URL = process.env.NODE_ENV === "production"
+  ? "https://card-viewer-umber.vercel.app"
+  : "http://localhost:5173";
 
 // ===== 導向 Google 登入頁 =====
 router.get("/", passport.authenticate("google", {
@@ -12,18 +15,16 @@ router.get("/", passport.authenticate("google", {
 
 // ===== Google 登入完成後的 callback =====
 router.get("/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "https://card-viewer-umber.vercel.app/login?error=1" }),
+  passport.authenticate("google", { session: false, failureRedirect: `${FRONTEND_URL}/login?error=1` }),
   (req, res) => {
-    // 發 JWT
     const token = jwt.sign(
       { userId: req.user._id, username: req.user.username, isAdmin: req.user.isAdmin },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
-
-    // 把 token 和 username 帶回前端
-    res.redirect(`https://card-viewer-umber.vercel.app/login?token=${token}&username=${encodeURIComponent(req.user.username)}&isAdmin=${req.user.isAdmin}`);
+    res.redirect(`${FRONTEND_URL}/login?token=${token}&username=${encodeURIComponent(req.user.username)}&isAdmin=${req.user.isAdmin}`);
   }
 );
+
 
 export default router;
