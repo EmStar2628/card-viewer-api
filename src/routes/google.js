@@ -12,7 +12,7 @@ router.get("/", passport.authenticate("google", {
 
 // ===== Google 登入完成後的 callback =====
 router.get("/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "http://localhost:5173/login?error=1" }),
+  passport.authenticate("google", { session: false, failureRedirect: "https://card-viewer-umber.vercel.app/login?error=1" }),
   (req, res) => {
     // 發 JWT
     const token = jwt.sign(
@@ -22,7 +22,7 @@ router.get("/callback",
     );
 
     // 把 token 和 username 帶回前端
-    res.redirect(`http://localhost:5173/login?token=${token}&username=${encodeURIComponent(req.user.username)}`);
+    res.redirect(`https://card-viewer-umber.vercel.app/login?token=${token}&username=${encodeURIComponent(req.user.username)}`);
   }
 );
 
