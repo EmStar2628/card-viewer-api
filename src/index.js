@@ -10,6 +10,7 @@ import authRoutes from "./routes/auth.js";
 import cardRoutes from "./routes/cards.js";
 import interactionRoutes from "./routes/interactions.js";
 import googleRoutes from "./routes/google.js";
+import announcementRoutes from "./routes/announcements.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/auth/google", googleRoutes);
 app.use("/api/cards", cardRoutes);
 app.use("/api/interactions", interactionRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 const PORT = process.env.PORT || 3000;
 

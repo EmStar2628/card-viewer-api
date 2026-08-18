@@ -41,12 +41,12 @@ router.post("/login", async (req, res) => {
 
     // 發 JWT
     const token = jwt.sign(
-      { userId: user._id, username: user.username },
+      { userId: user._id, username: user.username, isAdmin: user.isAdmin },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    res.json({ token, username: user.username });
+    res.json({ token, username: user.username, isAdmin: user.isAdmin });
   } catch (err) {
   console.error(err);
   res.status(500).json({ message: "伺服器錯誤" });

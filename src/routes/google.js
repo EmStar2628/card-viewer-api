@@ -16,13 +16,13 @@ router.get("/callback",
   (req, res) => {
     // 發 JWT
     const token = jwt.sign(
-      { userId: req.user._id, username: req.user.username },
+      { userId: req.user._id, username: req.user.username, isAdmin: req.user.isAdmin },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     // 把 token 和 username 帶回前端
-    res.redirect(`https://card-viewer-umber.vercel.app/login?token=${token}&username=${encodeURIComponent(req.user.username)}`);
+    res.redirect(`https://card-viewer-umber.vercel.app/login?token=${token}&username=${encodeURIComponent(req.user.username)}&isAdmin=${req.user.isAdmin}`);
   }
 );
 
