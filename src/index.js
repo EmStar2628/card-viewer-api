@@ -16,7 +16,9 @@ const app = express();
 // dotenv 載入後才初始化 passport
 initPassport();
 
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({
+  origin: ["http://localhost:5173", "https://card-viewer-umber.vercel.app"]
+}));
 app.use(express.json());
 app.use(passport.initialize());
 
