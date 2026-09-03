@@ -19,6 +19,18 @@ const cardSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  imageUrl: {
+    type: String,
+    default: ""
+  },
+  imageCrop: {
+    type: new mongoose.Schema({
+      x: { type: Number, default: 50 },
+      y: { type: Number, default: 50 },
+      zoom: { type: Number, default: 1 }
+    }, { _id: false }),
+    default: null
+  },
   description: {
     type: String,
     default: ""

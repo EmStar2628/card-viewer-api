@@ -17,3 +17,19 @@ export default function auth(req, res, next) {
     res.status(401).json({ message: "Token 無效或已過期" });
   }
 }
+
+// 有登入就解出 req.user，沒登入也放行（給「僅顯示我的」這類可選篩選用）
+export function optionalAuth(req, res, next) {
+  const header = req.headers.authorization;
+  if (header) {
+    const token = header.split(" ")[1];
+    if (token) {
+      try {
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
+      } catch {
+        // token 無效就當作沒登入，不擋請求
+      }
+    }
+  }
+  next();
+}

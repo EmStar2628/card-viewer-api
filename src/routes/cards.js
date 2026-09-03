@@ -1,13 +1,13 @@
 import express from "express";
 import Card from "../models/Card.js";
-import auth from "../middleware/auth.js";
+import auth, { optionalAuth } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // ===== 新增卡片（需要登入）=====
 router.post("/", auth, async (req, res) => {
   try {
-    const { cardCode, parsedName, element, race, series, imageSource, skillTags, description } = req.body;
+    const { cardCode, parsedName, element, race, series, imageSource, imageUrl, imageCrop, skillTags, description } = req.body;
 
     const card = await Card.create({
       owner: req.user.userId,
@@ -17,6 +17,8 @@ router.post("/", auth, async (req, res) => {
       race,
       series,
       imageSource: imageSource || "",
+      imageUrl: imageUrl || "",
+      imageCrop: imageCrop || null,
       skillTags: skillTags || [],
       description: description || ""
     });
@@ -28,10 +30,10 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-// ===== 取得所有卡片（不需要登入）=====
-router.get("/", async (req, res) => {
+// ===== 取得所有卡片（不需要登入；有登入才能用 mine 篩選）=====
+router.get("/", optionalAuth, async (req, res) => {
   try {
-    const { q, element, race, series, tags } = req.query;
+    const { q, element, race, series, tags, mine } = req.query;
 
     const filter = {};
 
@@ -39,6 +41,7 @@ router.get("/", async (req, res) => {
     if (element) filter.element = element;
     if (race) filter.race = race;
     if (series) filter.series = series;
+    if (mine === "true" && req.user) filter.owner = req.user.userId;
 
     // tags 是逗號分隔的字串，例如 "引爆符石,追打"
     if (tags) {
@@ -49,7 +52,7 @@ router.get("/", async (req, res) => {
     const cards = await Card.find(filter)
       .populate("owner", "username")
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(500);
 
     res.json(cards);
   } catch (err) {
@@ -66,6 +69,38 @@ router.get("/:id", async (req, res) => {
 
     if (!card) return res.status(404).json({ message: "找不到卡片" });
 
+    res.json(card);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "伺服器錯誤" });
+  }
+});
+
+// ===== 編輯卡片（只有本人能改）=====
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const card = await Card.findById(req.params.id);
+    if (!card) return res.status(404).json({ message: "找不到卡片" });
+
+    if (card.owner.toString() !== req.user.userId)
+      return res.status(403).json({ message: "沒有權限" });
+
+    const { cardCode, parsedName, element, race, series, imageSource, imageUrl, imageCrop, skillTags, description } = req.body;
+
+    Object.assign(card, {
+      cardCode,
+      parsedName,
+      element,
+      race,
+      series,
+      imageSource: imageSource || "",
+      imageUrl: imageUrl || "",
+      imageCrop: imageCrop || null,
+      skillTags: skillTags || [],
+      description: description || ""
+    });
+
+    await card.save();
     res.json(card);
   } catch (err) {
     console.error(err);
